@@ -41,7 +41,8 @@
     {% if usuario.role == 'admin' %}
         <a href="/produtos/novo">+ Novo produto</a>
     {% endif %}
-
+    
+    <p>({{total_produtos}}) produtos</p>
     <table border="1" cellpadding="8">
         <thead>
             <tr>
@@ -89,6 +90,32 @@
             {% endif %}
         </tbody>
     </table>
+
+    <br>
+    {% if total_pages > 1 %}
+    <div>
+
+        <p>
+            Página {{page}} de {{total_pages}} 
+        </p>
+        
+        {% if page > 1 %}
+            <a href="/produtos/?page={{page - 1}}&por_page={{ por_page }}
+            &busca={{ busca }}&categoria_id={{ categoria_id}}">
+            ⬅️ Anterior
+        </a>
+        {% endif %}
+
+        {% if page < total_pages %}
+            <a href="/produtos/?page={{page + 1}}&por_page={{ por_page }}
+            &busca={{ busca }}&categoria_id={{ categoria_id }}">
+            ➡️ Próximo
+        </a>
+        {% endif %}
+
+    </div>
+    {% endif %}
+    <br>
 
     <p><a href="/">← Dashboard</a></p>
 </body>

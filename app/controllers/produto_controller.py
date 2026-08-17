@@ -1,7 +1,7 @@
 # ============================================================
 # controllers/produto_controller.py — CRUD produtos AAPM SENAI
 # ============================================================
-
+import math
 import os
 import shutil
 from fastapi import APIRouter, Depends, Request, Form, UploadFile, File, status
@@ -31,7 +31,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)  # cria a pasta se não existir
 def listar_produtos(
     request: Request,
     busca: str = "",
-    categoria_id: int = 0,       # 0 = todas as categorias
+    categoria_id: int = 0,     
+    page: int = 1,
+    por_page: int = 3,
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
 ):
@@ -43,7 +45,19 @@ def listar_produtos(
     if categoria_id:
         query = query.filter(Produto.categoria_id == categoria_id)
 
-    produtos    = query.order_by(Produto.nome).all()
+    query = query.order_by(Produto.nome)
+
+    total_produtos = query.count()
+
+    page = max(page, 1)
+    por_page = max(por_page, 1)
+
+    total_pages = math.ceil(total_produtos / por_page) if total_produtos else 1
+
+    offset = (page - 1) * por_page
+
+    produtos = query.offset(offset).limit(por_page).all()
+
     categorias  = db.query(Categoria).filter(Categoria.ativo == True).all()
 
     return templates.TemplateResponse(
@@ -56,6 +70,11 @@ def listar_produtos(
             "categorias":   categorias,
             "busca":        busca,
             "categoria_id": categoria_id,
+            "page": page,
+            "por_page": por_page,
+            "total_pages": total_pages,
+            "total_produtos": total_produtos,
+
         }
     )
 
